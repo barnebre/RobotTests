@@ -56,6 +56,28 @@ Get Jenkins Driver
     Set Selenium Speed    .75 seconds
     Mobile Setup Jenks
 
+Google Login Jenkins
+    ${ele}=    Run Keyword And Return Status    Element Should Not Be Visible    id=account-chooser-add-account
+    Run keyword if    ${ele}    Handle New Google Login
+    ...    ELSE    Handle Exisiting Account
+    Select Window    ${LandPKSSignIn}
+
+Add Plot Jenkins
+    Add New Land Info Plot
+    ${Sucess}=    Check for land info sucess
+    run keyword if    ${Sucess}    Try to submit Land Info
+    Check for land info sucess
+
+Use main page to finish plot Jenkins
+    mobile land info using main page
+    Set Selenium Timeout    5 seconds
+
+Check Mobile web
+    [Tags]    Mobile
+    Set Selenium Timeout    15 seconds
+    Set Selenium Speed    .75 seconds
+    Mobile Setup
+
 Google Login
     ${ele}=    Run Keyword And Return Status    Element Should Not Be Visible    id=account-chooser-add-account
     Run keyword if    ${ele}    Handle New Google Login
@@ -71,12 +93,6 @@ Add Plot
 Use main page to finish plot
     mobile land info using main page
     Set Selenium Timeout    5 seconds
-
-Check Mobile web
-    [Tags]    Mobile
-    Set Selenium Timeout    15 seconds
-    Set Selenium Speed    .75 seconds
-    Mobile Setup
 
 *** Keywords ***
 Open test browser
