@@ -1,8 +1,9 @@
 *** Settings ***
+Suite Teardown    Close Test Browser
 Library           Selenium2Library
-Library           ../framework/SauceLabs.py
+Library           framework/SauceLabs.py
 Library           String
-Library           ../framework/Testing.py
+Library           framework/Testing.py
 
 *** Variables ***
 @{_tmpFire}       name:Testing RobotFramework Selenium2Library,browserName:firefox, platform:Windows 8,version:14
@@ -49,14 +50,31 @@ ${FloodTypesXpsLI1}    /html/body/ion-nav-view/ion-tabs/ion-nav-view/div/ion-vie
 ${SoilLayersXpsLI}    //div[@class='scroll']/a
 
 *** Test Cases ***
+Get Jenkins Driver
+    [Tags]    Jenkins
+    Get Jenkins Platform
+
 Check Mobile web
     [Tags]    Mobile
     Set Selenium Timeout    15 seconds
     Set Selenium Speed    .75 seconds
-    Open test browser
-    mobile manipulation
+    Mobile Setup
+
+Google Login
+    ${ele}=    Run Keyword And Return Status    Element Should Not Be Visible    id=account-chooser-add-account
+    Run keyword if    ${ele}    Handle New Google Login
+    ...    ELSE    Handle Exisiting Account
+    Select Window    ${LandPKSSignIn}
+
+Add Plot
+    Add New Land Info Plot
+    ${Sucess}=    Check for land info sucess
+    run keyword if    ${Sucess}    Try to submit Land Info
+    Check for land info sucess
+
+Use main page to finish plot
+    mobile land info using main page
     Set Selenium Timeout    5 seconds
-    [Teardown]    Close test browser
 
 *** Keywords ***
 Open test browser
@@ -70,8 +88,14 @@ Close test browser
     Run keyword if    '${REMOTE_URL}' != ''    Report Sauce status    ${SUITE_NAME} | ${TEST_NAME}    ${TEST_STATUS}    ${TEST_TAGS}    ${REMOTE_URL}
     Close all browsers
 
+Mobile Setup
+    Open test browser
+    go to    ${MobileApps}
+    Click element    xpath=${XpathLandHome}
+    Click element    id=${GoogleLoginBut}
+
 Handle New Google Login
-    Select window    Title=${GoogleSignIN}
+    ${window}=    Run keyword and return status    Select window    Title=${GoogleSignIN}
     wait until page contains element    id=${GoogleEmailField}
     input text    id=${GoogleEmailField}    ${GoogleEmail}
     Click Element    id=next
@@ -133,7 +157,7 @@ proc soil layer
     ${layer}=    Get WebElement    xpath=//div[@class='lpks-select']/input
     Click element if visable    ${layer}
     click element    xpath=/html/body/div[4]/div/div[2]/div/ion-view/ion-content/div[1]/a[1]/img
-    click element if visable by locator    xpath=//span[@class='nav-bar-title']/a[@class='button button-icon']/img
+    click element if visable by locator    xpath=//html/body/ion-nav-bar/div[1]/ion-header-bar/div[1]/span/a[2]
 
 proc current module
     @{FloodTypes}=    Get WebElements    xpath=${FloodTypesXpsLI}
