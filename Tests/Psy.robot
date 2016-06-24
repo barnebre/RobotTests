@@ -18,10 +18,6 @@ ${XpathLandHome}    //html/body/ion-nav-view/ion-tabs/ion-nav-view/div/ion-view/
 ${GoogleLoginBut}    loginGoogleWebBrowser
 ${GoogleSignIN}    Sign in - Google Accounts
 ${LandPKSSignIn}    LandPKS Sign-In
-${GoogleEmail}    lpks.test@gmail.com
-${GoogleEmaiPass}    landpotentialtest
-${GoogleEmail1}    barnebre@gmail.com
-${GoogleEmaiPass1}    _PL)OK(IJ
 ${GoogleEmailField}    Email
 ${GooglePassField}    Passwd
 ${GooglePassXpath}    //html/body/div/div[2]/div[2]/div[1]/form/div[2]/div/div[2]/div/div/input[2]
@@ -125,13 +121,14 @@ Mobile Setup Jenks
     Click element    id=${GoogleLoginBut}
 
 Handle New Google Login
+    @{GoogleCreds}=    Get Uname And Pword Lpks Gmail
     ${window}=    Run keyword and return status    Select window    Title=${GoogleSignIN}
     wait until page contains element    id=${GoogleEmailField}
-    input text    id=${GoogleEmailField}    ${GoogleEmail}
+    input text    id=${GoogleEmailField}    @{GoogleCreds}[0]
     Click Element    id=next
     wait until page contains element    id=${GooglePassField}
     focus    id=${GooglePassField}
-    input text    id=${GooglePassField}    ${GoogleEmaiPass}
+    input text    id=${GooglePassField}    @{GoogleCreds}[1]
     Page should contain element    xpath=${GoogleSignINBut}
     Wait Until Element Is Enabled    xpath=${GoogleSignINBut}
     Wait Until Element Is visible    xpath=${GoogleSignINBut}

@@ -66,5 +66,10 @@ def get_sauce_creds_jenkins():
                              os.environ.get("SAUCE_ACCESS_KEY")
                              )
     return creds
-    
+def get_uname_and_pword_lpks_gmail():
+    loginCred = {
+        os.environ.get("LPKS_TEST_UNAME"),
+        os.environ.get("LPKS_TEST_PWORD")
+        }
+    return loginCred
         
