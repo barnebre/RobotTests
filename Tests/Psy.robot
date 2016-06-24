@@ -53,6 +53,7 @@ ${SoilLayersXpsLI}    //div[@class='scroll']/a
 Get Jenkins Driver
     [Tags]    Jenkins
     Get Jenkins Platform
+    Mobile Setup Jenks
 
 Check Mobile web
     [Tags]    Mobile
@@ -90,6 +91,11 @@ Close test browser
 
 Mobile Setup
     Open test browser
+    go to    ${MobileApps}
+    Click element    xpath=${XpathLandHome}
+    Click element    id=${GoogleLoginBut}
+
+Mobile Setup Jenks
     go to    ${MobileApps}
     Click element    xpath=${XpathLandHome}
     Click element    id=${GoogleLoginBut}
