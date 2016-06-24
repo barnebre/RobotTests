@@ -10,7 +10,6 @@ import string
 from selenium.webdriver.common import desired_capabilities
 from Selenium2Library.keywords._browsermanagement import BROWSER_NAMES
 from robot.libraries.BuiltIn import BuiltIn
-from lib2to3.tests.support import driver
 from robotide.lib.robot.utils.asserts import fail_if
 from selenium.common.exceptions import WebDriverException
 from selenium.webdriver.support.wait import WebDriverWait
