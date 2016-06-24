@@ -52,13 +52,9 @@ ${SoilLayersXpsLI}    //div[@class='scroll']/a
 *** Test Cases ***
 Get Jenkins Driver
     [Tags]    Jenkins
-    Mobile Setup Jenks
-
-Check Mobile web
-    [Tags]    Mobile
     Set Selenium Timeout    15 seconds
     Set Selenium Speed    .75 seconds
-    Mobile Setup
+    Mobile Setup Jenks
 
 Google Login
     ${ele}=    Run Keyword And Return Status    Element Should Not Be Visible    id=account-chooser-add-account
@@ -75,6 +71,12 @@ Add Plot
 Use main page to finish plot
     mobile land info using main page
     Set Selenium Timeout    5 seconds
+
+Check Mobile web
+    [Tags]    Mobile
+    Set Selenium Timeout    15 seconds
+    Set Selenium Speed    .75 seconds
+    Mobile Setup
 
 *** Keywords ***
 Open test browser
