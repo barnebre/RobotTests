@@ -54,6 +54,8 @@ def get_jenkins_platform():
             os.environ.get("SAUCE_ACCESS_KEY")
             )
         )
+    selenium = BuiltIn().get_library_instance('Selenium2Library')
+    selenium._current_browser = driver
     
     return driver
         
