@@ -1,7 +1,8 @@
 import re
 import requests
 import simplejson as json
-
+import os
+from selenium import webdriver
 from robot.api import logger
 from robot.libraries.BuiltIn import BuiltIn
 
@@ -35,11 +36,11 @@ def report_sauce_status(name, status, tags=[], remote_url=''):
         logger.info('<a href="{0}">video.flv</a>'.format(video_url), html=True)
 def get_jenkins_platform():
     desire_cap =    webdriver.DesiredCapabilities.CHROME
-    desire_cap.setBrowserName(os.environ.get("SELENIUM_BROWSER"))
-    desire_cap.setVersion(os.environ.get("SELENIUM_VERSION"))
-    desire_cap.setCapability(CapabilityType.PLATFORM, os.environ.get("SELENIUM_PLATFORM"))
+    desire_cap['browserName'] = '{0}'.format(os.environ.get("SELENIUM_BROWSER"))
+    desire_cap['Version'] = '{0}'.format(os.environ.get("SELENIUM_VERSION"))
+    desire_cap['Capability'] = '{0}'.format(os.environ.get("SELENIUM_PLATFORM"))
     driver = webdriver.Remote(
-        desired_capabilities=webdriver.desire_cap,
+        desired_capabilities=desire_cap,
         command_executor = 'http://{0}:{1}@ondemand.saucelabs.com:80/wd/hub'.format(
             os.environ.get("SAUCE_USERNAME"),
             os.environ.get("SAUCE_ACCESS_KEY")
