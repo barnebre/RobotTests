@@ -62,7 +62,7 @@ def get_jenkins_capabilities():
     capa = 'name:Testing RobotFramework Selenium2Library,browserName:{0}, platform:{1}'.format(os.environ.get("SELENIUM_BROWSER"),os.environ.get("SELENIUM_PLATFORM"))
     return capa
 def get_sauce_creds_jenkins():
-    creds = '{0}:{1}'.format(os.environ.get("SAUCE_USERNAME"),
+    creds = 'http://{0}:{1}@ondemand.saucelabs.com:80/wd/hub'.format(os.environ.get("SAUCE_USERNAME"),
                              os.environ.get("SAUCE_ACCESS_KEY")
                              )
     return creds
