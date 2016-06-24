@@ -39,13 +39,6 @@ def get_jenkins_platform():
     desire_cap['browserName'] = '{0}'.format(os.environ.get("SELENIUM_BROWSER"))
     desire_cap['Version'] = '{0}'.format(os.environ.get("SELENIUM_VERSION"))
     desire_cap['Capability'] = '{0}'.format(os.environ.get("SELENIUM_PLATFORM"))
-    driver = webdriver.Remote(
-        desired_capabilities=desire_cap,
-        command_executor = 'http://{0}:{1}@ondemand.saucelabs.com:80/wd/hub'.format(
-            os.environ.get("SAUCE_USERNAME"),
-            os.environ.get("SAUCE_ACCESS_KEY")
-            )
-        )
     logger.info('Browser:{0} Version:{1} Capability:{2} URL:{3}:{4}'.format(
             os.environ.get("SELENIUM_BROWSER"),
             os.environ.get("SELENIUM_VERSION"),
@@ -54,5 +47,13 @@ def get_jenkins_platform():
             os.environ.get("SAUCE_ACCESS_KEY")
             )
         )
+    driver = webdriver.Remote(
+        desired_capabilities=desire_cap,
+        command_executor = 'http://{0}:{1}@ondemand.saucelabs.com:80/wd/hub'.format(
+            os.environ.get("SAUCE_USERNAME"),
+            os.environ.get("SAUCE_ACCESS_KEY")
+            )
+        )
+    
     return driver
         
