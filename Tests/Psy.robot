@@ -52,7 +52,6 @@ ${SoilLayersXpsLI}    //div[@class='scroll']/a
 *** Test Cases ***
 Get Jenkins Driver
     [Tags]    Jenkins
-    Get Jenkins Platform
     Mobile Setup Jenks
 
 Check Mobile web
@@ -81,6 +80,10 @@ Use main page to finish plot
 Open test browser
     Open browser    http://www.google.com    ${Browser}    \    remote_url=${REMOTE_URL}    desired_capabilities=${CAPABILITIES}
 
+Open test browser jenkins
+    [Arguments]    ${Capa}    ${Remote}
+    Open browser    http://www.google.com    ${Browser}    \    remote_url=${Remote}    desired_capabilities=${Capa}
+
 Open test browser2
     [Arguments]    ${Capa}
     Open browser    http://www.google.com    ${Browser}    \    remote_url=${REMOTE_URL}    desired_capabilities=${Capa}
@@ -96,6 +99,9 @@ Mobile Setup
     Click element    id=${GoogleLoginBut}
 
 Mobile Setup Jenks
+    ${Caps}=    Get Jenkins Capabilities
+    ${Creds}=    Get Sauce Creds Jenkins
+    Open test browser jenkins    ${Caps}    ${Creds}
     go to    ${MobileApps}
     Click element    xpath=${XpathLandHome}
     Click element    id=${GoogleLoginBut}
