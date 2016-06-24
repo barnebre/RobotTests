@@ -46,5 +46,13 @@ def get_jenkins_platform():
             os.environ.get("SAUCE_ACCESS_KEY")
             )
         )
+    logger.info('Browser:{0} Version:{1} Capability:{2} URL:{3}:{4}'.format(
+            os.environ.get("SELENIUM_BROWSER"),
+            os.environ.get("SELENIUM_VERSION"),
+            os.environ.get("SELENIUM_PLATFORM"),
+            os.environ.get("SAUCE_USERNAME"),
+            os.environ.get("SAUCE_ACCESS_KEY")
+            )
+        )
     return driver
         
