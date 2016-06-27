@@ -3,6 +3,7 @@ import time
 import re
 import requests
 import simplejson as json
+import json
 import random
 from robot.api import logger
 from _random import Random
@@ -18,6 +19,8 @@ from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
 from datetime import datetime
 from mobile import mobileHandle
+from json.decoder import JSONArray
+import os
 MOBILE_APP_WEBPAGE = "http://testlpks.landpotential.org:8105/#/landpks/landpks_entry_page"
 SAUCE_ACCESS_KEY = 'Barnebre:216526d7-706f-4eff-bf40-9d774203e268'
 USERNAME_ACCESS_KEY = re.compile('^(http|https):\/\/([^:]+):([^@]+)@')
@@ -290,3 +293,17 @@ def scroll_to_element(element):
     selenium = BuiltIn().get_library_instance('Selenium2Library')
     driver = selenium._current_browser()
     driver.execute_script("arguments[0].scrollIntoView(true);", element);
+def get_browsers():
+        
+        browsers = json.loads(os.getenv("SAUCE_ONDEMAND_BROWSERS"))
+        browserRet =[]
+        for e in browsers:
+            inputForE = {"browser":e["browser"],
+                     "platform": e["platform"],
+                     "version": e["browserVersion"]
+                     }
+            browserRet.append(inputForE)
+        return browserRet
+def get_browser_setup_count():
+    browsers = json.loads(os.getenv("SAUCE_ONDEMAND_BROWSERS"))
+    return len(browsers)

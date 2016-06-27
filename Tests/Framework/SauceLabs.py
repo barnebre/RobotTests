@@ -59,7 +59,11 @@ def get_jenkins_platform():
     return driver
 def get_jenkins_capabilities():
 
-    capa = 'name:Testing RobotFramework Selenium2Library,browserName:{0}, platform:{1}'.format(os.environ.get("SELENIUM_BROWSER"),os.environ.get("SELENIUM_PLATFORM"))
+    capa = 'name:Testing with Jenkins RobotFramework Selenium2Library,browserName:{0}, platform:{1},version:{2}'.format(os.environ.get("SELENIUM_BROWSER"),os.environ.get("SELENIUM_PLATFORM"),os.environ.get("SELENIUM_VERSION"))
+    return capa
+def set_jenkins_capabilities(browser, platform, version):
+
+    capa = 'name:Testing with Jenkins RobotFramework Selenium2Library,browserName:{0}, platform:{1},version:{2}'.format(browser,platform,version)
     return capa
 def get_sauce_creds_jenkins():
     creds = 'http://{0}:{1}@ondemand.saucelabs.com:80/wd/hub'.format(os.environ.get("SAUCE_USERNAME"),
@@ -72,4 +76,5 @@ def get_uname_and_pword_lpks_gmail():
         os.environ.get("LPKS_TEST_PWORD")
         }
     return loginCred
+
         

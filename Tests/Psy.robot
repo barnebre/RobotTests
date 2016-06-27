@@ -1,5 +1,4 @@
 *** Settings ***
-Suite Teardown    Close Test Browser
 Library           Selenium2Library
 Library           Framework/SauceLabs.py
 Library           String
@@ -7,10 +6,8 @@ Library           Framework/Testing.py
 
 *** Variables ***
 @{_tmpFire}       name:Testing RobotFramework Selenium2Library,browserName:firefox, platform:Windows 8,version:14
-@{_tmpIE}         name:Testing RobotFramework Selenium2Library,browserName:Internet explorer, platform:Windows 8,version:10
+@{_tmpIE}         name:Testing RobotFramework Selenium2Library,browserName:internet explorer, platform:Windows 8,version:10
 ${CAPABILITIES}    ${EMPTY.join(${_tmpIE})}
-${KEY}            Barnebre:216526d7-706f-4eff-bf40-9d774203e268
-${REMOTE_URL}     http://${KEY}@ondemand.saucelabs.com:80/wd/hub
 ${LOGIN_FAIL_MSG}    Incorrect username or password.
 ${Browser}        firefox
 ${MobileApps}     http://testlpks.landpotential.org:8105/
@@ -44,13 +41,17 @@ ${LinksAddPlot}    //div[@class='scroll']/a[@class='item item-icon-right otherco
 ${FloodTypesXpsLI}    //div[@class='scroll']/div/div[contains(@class,'col col-5')]/img
 ${FloodTypesXpsLI1}    /html/body/ion-nav-view/ion-tabs/ion-nav-view/div/ion-view/ion-content/div/div/div[contains(@class,'col col-5')]/img
 ${SoilLayersXpsLI}    //div[@class='scroll']/a
+${LatitudeInputID}    latitude
+${LongitudeInputID}    longitude
 
 *** Test Cases ***
 Get Jenkins Driver
     [Tags]    Jenkins
     Set Selenium Timeout    15 seconds
     Set Selenium Speed    .75 seconds
-    Mobile Setup Jenks
+    ${JenkinsSetupSize}=    Get Browser Setup Count
+    run keyword if    ${JenkinsSetupSize} >=1    Mobile Multi Setup Jenks
+    ...    ELSE    Mobile Setup Jenks
 
 Google Login Jenkins
     ${ele}=    Run Keyword And Return Status    Element Should Not Be Visible    id=account-chooser-add-account
@@ -65,8 +66,10 @@ Add Plot Jenkins
     Check for land info sucess
 
 Use main page to finish plot Jenkins
+    [Documentation]    Uses Jenkins created browser to go through all aspects up site and check to make sure each performs well as expected. This can be run on local machine by setting the appropriate environmental variables
     mobile land info using main page
     Set Selenium Timeout    5 seconds
+    [Teardown]    Close Test Browser
 
 Check Mobile web
     [Tags]    Mobile
@@ -75,18 +78,21 @@ Check Mobile web
     Mobile Setup
 
 Google Login
+    [Tags]    Mobile
     ${ele}=    Run Keyword And Return Status    Element Should Not Be Visible    id=account-chooser-add-account
     Run keyword if    ${ele}    Handle New Google Login
     ...    ELSE    Handle Exisiting Account
     Select Window    ${LandPKSSignIn}
 
 Add Plot
+    [Tags]    Mobile
     Add New Land Info Plot
     ${Sucess}=    Check for land info sucess
     run keyword if    ${Sucess}    Try to submit Land Info
     Check for land info sucess
 
 Use main page to finish plot
+    [Tags]    Mobile
     mobile land info using main page
     Set Selenium Timeout    5 seconds
 
@@ -112,11 +118,33 @@ Mobile Setup
     Click element    xpath=${XpathLandHome}
     Click element    id=${GoogleLoginBut}
 
+Mobile Multi Setup Jenks
+    ${Creds}=    Get Sauce Creds Jenkins
+    @{Browsers}=    Get Browsers
+    : FOR    ${Browser}    IN    @{Browsers}
+    \    ${caps}=    Set Jenkins Capabilities    ${Browser["browser"]}    ${Browser["platform"]}    ${Browser["version"]}
+    \    Open test browser jenkins    ${caps}    ${Creds}
+    \    go to    ${MobileApps}
+    \    wait until element is visible    xpath=${XpathLandHome}
+    \    Click element    xpath=${XpathLandHome}
+    \    Click element    id=${GoogleLoginBut}
+    \    ${ele}=    Run Keyword And Return Status    Element Should Not Be Visible    id=account-chooser-add-account
+    \    Run keyword if    ${ele}    Handle New Google Login
+    \    ...    ELSE    Handle Exisiting Account
+    \    Select Window    ${LandPKSSignIn}
+    \    Add New Land Info Plot
+    \    ${Sucess}=    Check for land info sucess
+    \    run keyword if    ${Sucess}    Try to submit Land Info
+    \    Check for land info sucess
+    \    mobile land info using main page
+    \    Close Test Browser
+
 Mobile Setup Jenks
     ${Caps}=    Get Jenkins Capabilities
     ${Creds}=    Get Sauce Creds Jenkins
     Open test browser jenkins    ${Caps}    ${Creds}
     go to    ${MobileApps}
+    wait until element is visible    xpath=${XpathLandHome}
     Click element    xpath=${XpathLandHome}
     Click element    id=${GoogleLoginBut}
 
@@ -153,6 +181,7 @@ mobile manipulation
 mobile land info using main page
     ${count}=    Get Matching Xpath Count    ${LinksAddPlot}
     @{Links}=    Get WebElements    xpath=${LinksAddPlot}
+    submit Land Info
     : FOR    ${i}    IN RANGE    1    ${count} + 1
     \    ${link}=    Get WebElement    xpath=(${LinksAddPlot})[${i}]
     \    ${Atrib}=    get element atrrib    ${link}    href
@@ -162,6 +191,8 @@ mobile land info using main page
     \    Try to submit Land Info
     \    Check for land info sucess
     proc soil layers
+    Check for land info sucess
+    submit Land Info
 
 proc soil layers
     ${count}=    Get Matching Xpath Count    ${SoilLayersXpsLI}
@@ -183,8 +214,10 @@ proc soil layer
     click element if visable    ${Submit}
     ${layer}=    Get WebElement    xpath=//div[@class='lpks-select']/input
     Click element if visable    ${layer}
-    click element    xpath=/html/body/div[4]/div/div[2]/div/ion-view/ion-content/div[1]/a[1]/img
-    click element if visable by locator    xpath=//html/body/ion-nav-bar/div[1]/ion-header-bar/div[1]/span/a[2]
+    ${randomIndex}    Generate Random String    1    1234
+    click element    xpath=/html/body/div[4]/div/div[2]/div/ion-view/ion-content/div[1]/a[${randomIndex}]/img
+    log    go back
+    click element if visable by locator    xpath=/html/body/ion-nav-bar/div[2]/ion-header-bar/div[1]/span/a[2]
 
 proc current module
     @{FloodTypes}=    Get WebElements    xpath=${FloodTypesXpsLI}
@@ -206,6 +239,45 @@ click element if visable by locator
     run keyword if    ${Visible}    click element    ${element}
     [Return]    ${Visible}
 
+submit Land Info
+    Click link    xpath=${ReviewPlotXpLi}
+    Click element    id=${SubmitPlotButIdLI}
+    ${success}=    Run keyword and return status    Element Should Contain    xpath=//div[@class='popup-body']/span[1]    Confirm submit. Submitted data may become publicly available.
+    run keyword if    '${success}'=='False'    Proc Error on Submit
+    ${result}=    Run keyword and return status    element should be visible    xpath=//div[@class='popup-buttons']/button[@class='button ng-binding button-positive']
+    run keyword if    ${result}    click element    xpath=//div[@class='popup-buttons']/button[@class='button ng-binding button-positive']
+    wait until element is visible    xpath=//div[@class='popup-body']/span[1]
+    ${success}=    Run keyword and return status    Element Should Contain    xpath=//div[@class='popup-body']/span[1]    Plot is submitted
+    run keyword if    ${success}    element should be visible    xpath=//div[@class='popup-buttons']/button[@class='button ng-binding button-positive']
+    run keyword if    ${success}    click element    xpath=//div[@class='popup-buttons']/button[@class='button ng-binding button-positive']
+    run keyword unless    ${success}    Proc Error on Submit
+    [Return]    ${success}
+
+Proc error on submit
+    ${LatError}=    set variable    False
+    ${LongError}=    set variable    False
+    ${SlopeError}=    set variable    False
+    ${PopupBody}=    set variable    //div[@class='popup-body']/span
+    @{Links}=    Get WebElements    xpath=${PopupBody}
+    : FOR    ${i}    IN RANGE    1    ${count} + 1
+    \    ${error}=    Get WebElement    xpath=(${PopupBody})[${i}]
+    \    {$Text}=    get text    ${error}
+    \    run keyword if    '${Text}' == '    * Longitude'    ${LongError}=    set variable    true
+    \    run keyword if    '${Text}' == '    * Latitude'    ${LatError}=    set variable    true
+    click element    xpath=//div[@class='popup-buttons']/button[@class='button ng-binding button-positive']
+    Run keyword if    ${LatError}    or    ${LongError}    Proc Lat and Long Error
+
+Proc Lat and Long Error
+    Check for land info sucess
+    Wait Until Element Is visible    xpath=${AddPlotMenuPlotXpLI}
+    click element    xpath=${AddPlotMenuPlotXpLI}
+    ${RandLat}=    Generate Random String    2    123456789
+    input text    id={LatitudeInputID}    ${RandLat}
+    ${RandLong}=    Generate Random String    2    123456789
+    input text    id={LatitudeInputID}    ${RandLong}
+    Check for land info sucess
+    submit Land Info
+
 Try to submit Land Info
     Click link    xpath=${ReviewPlotXpLi}
     Click element    id=${SubmitPlotButIdLI}
@@ -223,7 +295,8 @@ Add New Land Info Plot
     Set Selenium Speed    .35 seconds
     Check for land info error
     click element    id=${TestPlotYesRadioIdLI}
-    ${RandomString}=    Generate Random String    8
+    ${RandLength}=    Generate Random String    1    123456789
+    ${RandomString}=    Generate Random String    ${RandLength}    abs
     @{Elements}=    Get Webelements    tag=input
     : FOR    ${element}    IN    @{Elements}
     \    ${text}=    Get Value    ${element}
