@@ -112,6 +112,11 @@ Close test browser
     Run keyword if    '${REMOTE_URL}' != ''    Report Sauce status    ${SUITE_NAME} | ${TEST_NAME}    ${TEST_STATUS}    ${TEST_TAGS}    ${REMOTE_URL}
     Close all browsers
 
+Close test browser Jenkins
+    [Arguments]    ${URL}
+    Run keyword if    '${URL}' != ''    Report Sauce status    ${SUITE_NAME} | ${TEST_NAME}    ${TEST_STATUS}    ${TEST_TAGS}    ${URL}
+    Close all browsers
+
 Mobile Setup
     Open test browser
     go to    ${MobileApps}
@@ -124,20 +129,8 @@ Mobile Multi Setup Jenks
     : FOR    ${Browser}    IN    @{Browsers}
     \    ${caps}=    Set Jenkins Capabilities    ${Browser["browser"]}    ${Browser["platform"]}    ${Browser["version"]}
     \    Open test browser jenkins    ${caps}    ${Creds}
-    \    go to    ${MobileApps}
-    \    wait until element is visible    xpath=${XpathLandHome}
-    \    Click element    xpath=${XpathLandHome}
-    \    Click element    id=${GoogleLoginBut}
-    \    ${ele}=    Run Keyword And Return Status    Element Should Not Be Visible    id=account-chooser-add-account
-    \    Run keyword if    ${ele}    Handle New Google Login
-    \    ...    ELSE    Handle Exisiting Account
-    \    Select Window    ${LandPKSSignIn}
-    \    Add New Land Info Plot
-    \    ${Sucess}=    Check for land info sucess
-    \    run keyword if    ${Sucess}    Try to submit Land Info
-    \    Check for land info sucess
-    \    mobile land info using main page
-    \    Close Test Browser
+    \    mobile manipulation
+    \    Close Test Browser Jenkins    ${Creds}
 
 Mobile Setup Jenks
     ${Caps}=    Get Jenkins Capabilities
@@ -166,6 +159,8 @@ Handle New Google Login
 
 mobile manipulation
     go to    ${MobileApps}
+    Wait Until Element Is Enabled    xpath=${XpathLandHome}
+    Wait Until Element Is visible    xpath=${XpathLandHome}
     Click element    xpath=${XpathLandHome}
     Click element    id=${GoogleLoginBut}
     ${ele}=    Run Keyword And Return Status    Element Should Not Be Visible    id=account-chooser-add-account
