@@ -29,6 +29,7 @@ ${OrgFieldIdLI}    organization
 ${LatFieldIdLI}    latitude
 ${LonFieldIdLI}    longitude
 ${BackButPlotCssLi}    body.grade-a.platform-browser.platform-win32.platform-ready ion-nav-bar.bar-stable.bar.bar-header.bar-balanced.nav-bar-container div.nav-bar-block ion-header-bar.bar-stable.bar.bar-header.bar-balanced.disable-user-behavior div.title.title-left.header-item span.nav-bar-title a.button.button-icon
+${BackButPlotXpathLi}    //div[@nav-bar='active']/ion-header-bar/div[1]/span/a[2]
 ${LandInfoErrorMessage}    Answer to test plot is required.
 ${AlertPopUpCssLI}    body.grade-a.platform-browser.platform-win32.platform-ready.popup-open div.popup-container.remove-title-class.popup-showing.active div.popup div.popup-buttons button.button.ng-binding.button-positive
 ${ErrorMessageCssLI}    body.grade-a.platform-browser.platform-win32.platform-ready.popup-open div.popup-container.remove-title-class.popup-showing.active div.popup div.popup-body span
@@ -48,7 +49,7 @@ ${LongitudeInputID}    longitude
 Get Jenkins Driver
     [Tags]    Jenkins
     Set Selenium Timeout    15 seconds
-    Set Selenium Speed    .75 seconds
+    Set Selenium Speed    .65 seconds
     ${JenkinsSetupSize}=    Get Browser Setup Count
     run keyword if    ${JenkinsSetupSize} >1    Mobile Multi Setup Jenks
     ...    ELSE    Mobile Setup Jenks
@@ -129,7 +130,7 @@ Mobile Multi Setup Jenks
     : FOR    ${Browser}    IN    @{Browsers}
     \    ${caps}=    Set Jenkins Capabilities    ${Browser["browser"]}    ${Browser["platform"]}    ${Browser["version"]}
     \    Open test browser jenkins    ${caps}    ${Creds}
-    \    mobile manipulation
+    \    run keywrod and ignore error    mobile manipulation
     \    Close Test Browser Jenkins    ${Creds}
 
 Mobile Setup Jenks
@@ -303,15 +304,16 @@ Add New Land Info Plot
     \    run keyword unless    '${text}' == 'small' or '${text}' =='medium'    input text    ${element}    ${RandomString}
     Element should not contain    id=${LongitudeInputID}    ${RandomString}
     click element    id=btnObtainGPS
+    ${GPSError}=    Run keyword and return status    Element Should Contain    xpath=//div[@class='popup-body']/span[1]    Geolocation
+    run keyword if    ${GPSError}    click element    xpath=//div[@class='popup-buttons']/button[@class='button ng-binding button-positive']
 
 Check for land info sucess
-    Click element    css=${BackButPlotCssLi}
+    Click link    xpath=${BackButPlotXpathLi}
     ${result}=    Run keyword and return status    page should not contain element    css=${AlertPopUpCssLI}
     [Return]    ${result}
 
 Check for land info error
-    Click element    css=${BackButPlotCssLi}
-    input text    id=${OrgFieldIdLI}    4
+    Click link    xpath=${BackButPlotXpathLi}
     page should contain element    css=${AlertPopUpCssLI}
     click element    css=${AlertPopUpCssLI}
 
