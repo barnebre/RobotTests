@@ -50,7 +50,7 @@ Get Jenkins Driver
     Set Selenium Timeout    15 seconds
     Set Selenium Speed    .75 seconds
     ${JenkinsSetupSize}=    Get Browser Setup Count
-    run keyword if    ${JenkinsSetupSize} >=1    Mobile Multi Setup Jenks
+    run keyword if    ${JenkinsSetupSize} >1    Mobile Multi Setup Jenks
     ...    ELSE    Mobile Setup Jenks
 
 Google Login Jenkins
@@ -181,7 +181,6 @@ mobile manipulation
 mobile land info using main page
     ${count}=    Get Matching Xpath Count    ${LinksAddPlot}
     @{Links}=    Get WebElements    xpath=${LinksAddPlot}
-    submit Land Info
     : FOR    ${i}    IN RANGE    1    ${count} + 1
     \    ${link}=    Get WebElement    xpath=(${LinksAddPlot})[${i}]
     \    ${Atrib}=    get element atrrib    ${link}    href
@@ -254,40 +253,46 @@ submit Land Info
     [Return]    ${success}
 
 Proc error on submit
-    ${LatError}=    set variable    False
-    ${LongError}=    set variable    False
-    ${SlopeError}=    set variable    False
     ${PopupBody}=    set variable    //div[@class='popup-body']/span
-    @{Links}=    Get WebElements    xpath=${PopupBody}
+    ${count}=    Get Matching Xpath Count    ${PopupBody}
     : FOR    ${i}    IN RANGE    1    ${count} + 1
     \    ${error}=    Get WebElement    xpath=(${PopupBody})[${i}]
-    \    {$Text}=    get text    ${error}
-    \    run keyword if    '${Text}' == '    * Longitude'    ${LongError}=    set variable    true
-    \    run keyword if    '${Text}' == '    * Latitude'    ${LatError}=    set variable    true
+    \    ${Text}=    get text    ${error}
+    \    ${Lat}=    run keyword and return status    should contain    ${Text}    Latitude
+    \    ${Long}=    run keyword and return status    should contain    ${Text}    Longitude
+    \    run keyword if    ${Long}    Long error found
+    \    run keyword if    ${Lat}    Long error found
+
+Long Error Found
     click element    xpath=//div[@class='popup-buttons']/button[@class='button ng-binding button-positive']
-    Run keyword if    ${LatError}    or    ${LongError}    Proc Lat and Long Error
+    Proc Lat and Long Error
+    exit for loop
+    proc error on submit
 
 Proc Lat and Long Error
-    Check for land info sucess
-    Wait Until Element Is visible    xpath=${AddPlotMenuPlotXpLI}
-    click element    xpath=${AddPlotMenuPlotXpLI}
+    click element    xpath=/html/body/ion-nav-bar/div[1]/ion-header-bar/div[1]/span/a[2]
+    Wait Until Element Is visible    css=html body.grade-a.platform-browser.platform-win32.platform-ready ion-nav-view.view-container ion-tabs.tabs-item-hide.pane.tabs-bottom.tabs-standard ion-nav-view.view-container.tab-content div.pane ion-view.pane ion-content.padding.body.scroll-content.ionic-scroll.overflow-scroll.has-header div.scroll a.item.item-icon-right.plotid
+    click element    css=html body.grade-a.platform-browser.platform-win32.platform-ready ion-nav-view.view-container ion-tabs.tabs-item-hide.pane.tabs-bottom.tabs-standard ion-nav-view.view-container.tab-content div.pane ion-view.pane ion-content.padding.body.scroll-content.ionic-scroll.overflow-scroll.has-header div.scroll a.item.item-icon-right.plotid
     ${RandLat}=    Generate Random String    2    123456789
-    input text    id={LatitudeInputID}    ${RandLat}
+    input text    id=${LatitudeInputID}    ${RandLat}
     ${RandLong}=    Generate Random String    2    123456789
-    input text    id={LatitudeInputID}    ${RandLong}
+    input text    id=${LongitudeInputID}    ${RandLong}
     Check for land info sucess
-    submit Land Info
+    Click link    xpath=${ReviewPlotXpLi}
+    Click element    id=${SubmitPlotButIdLI}
 
 Try to submit Land Info
     Click link    xpath=${ReviewPlotXpLi}
     Click element    id=${SubmitPlotButIdLI}
     ${result}=    Run keyword and return status    element should be visible    css=${SubmitPlotErrorButCssLI}
+    element should contain    xpath=/html/body/div[4]/div/div[@class='popup-body']/span[1]    The following are required
     run keyword if    ${result}    click element    css=${SubmitPlotErrorButCssLI}
     [Return]    ${result}
 
 Add New Land Info Plot
     Wait Until Element Is visible    xpath=${LandInfoIcon}
     Click element    xpath=${LandInfoIcon}
+    Wait until element is enabled    xpath=//div[@class='list']
     Wait Until Element Is visible    xpath=${AddNewLandInfo}
     click element    xpath=${AddNewLandInfo}
     Wait Until Element Is visible    xpath=${AddPlotMenuPlotXpLI}
@@ -296,11 +301,13 @@ Add New Land Info Plot
     Check for land info error
     click element    id=${TestPlotYesRadioIdLI}
     ${RandLength}=    Generate Random String    1    123456789
-    ${RandomString}=    Generate Random String    ${RandLength}    abs
+    ${RandomString}=    Generate Random String    ${RandLength}
     @{Elements}=    Get Webelements    tag=input
     : FOR    ${element}    IN    @{Elements}
     \    ${text}=    Get Value    ${element}
     \    run keyword unless    '${text}' == 'small' or '${text}' =='medium'    input text    ${element}    ${RandomString}
+    Element should not contain    id=${LongitudeInputID}    ${RandomString}
+    click element    id=btnObtainGPS
 
 Check for land info sucess
     Click element    css=${BackButPlotCssLi}
