@@ -130,7 +130,7 @@ Mobile Multi Setup Jenks
     : FOR    ${Browser}    IN    @{Browsers}
     \    ${caps}=    Set Jenkins Capabilities    ${Browser["browser"]}    ${Browser["platform"]}    ${Browser["version"]}
     \    Open test browser jenkins    ${caps}    ${Creds}
-    \    run keywrod and ignore error    mobile manipulation
+    \    run keyword and ignore error    mobile manipulation
     \    Close Test Browser Jenkins    ${Creds}
 
 Mobile Setup Jenks
