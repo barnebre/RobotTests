@@ -44,12 +44,14 @@ ${FloodTypesXpsLI1}    /html/body/ion-nav-view/ion-tabs/ion-nav-view/div/ion-vie
 ${SoilLayersXpsLI}    //div[@class='scroll']/a
 ${LatitudeInputID}    latitude
 ${LongitudeInputID}    longitude
+${PopupButtonXpath}    //div[@class='popup-buttons']/button[@class='button ng-binding button-positive']
+${PopupBodyXpath}    //div
 
 *** Test Cases ***
 Get Jenkins Driver
     [Tags]    Jenkins
     Set Selenium Timeout    15 seconds
-    Set Selenium Speed    .65 seconds
+    Set Selenium Speed    1.2 seconds
     ${JenkinsSetupSize}=    Get Browser Setup Count
     run keyword if    ${JenkinsSetupSize} >1    Mobile Multi Setup Jenks
     ...    ELSE    Mobile Setup Jenks
@@ -75,7 +77,7 @@ Use main page to finish plot Jenkins
 Check Mobile web
     [Tags]    Mobile
     Set Selenium Timeout    15 seconds
-    Set Selenium Speed    .75 seconds
+    Set Selenium Speed    .85 seconds
     Mobile Setup
 
 Google Login
@@ -114,8 +116,8 @@ Close test browser
     Close all browsers
 
 Close test browser Jenkins
-    [Arguments]    ${URL}
-    Run keyword if    '${URL}' != ''    Report Sauce status    ${SUITE_NAME} | ${TEST_NAME}    ${TEST_STATUS}    ${TEST_TAGS}    ${URL}
+    [Arguments]    ${URL}    ${Name}    ${Status}
+    Run keyword if    '${URL}' != ''    Report Sauce status    ${SUITE_NAME} | ${Name}    ${Status}    Jenkins    ${URL}
     Close all browsers
 
 Mobile Setup
@@ -130,8 +132,8 @@ Mobile Multi Setup Jenks
     : FOR    ${Browser}    IN    @{Browsers}
     \    ${caps}=    Set Jenkins Capabilities    ${Browser["browser"]}    ${Browser["platform"]}    ${Browser["version"]}
     \    Open test browser jenkins    ${caps}    ${Creds}
-    \    run keyword and ignore error    mobile manipulation
-    \    Close Test Browser Jenkins    ${Creds}
+    \    ${Status}=    run keyword and return status    mobile manipulation
+    \    Close Test Browser Jenkins    ${Creds}    ${Browser["browser"]}    ${Status}
 
 Mobile Setup Jenks
     ${Caps}=    Get Jenkins Capabilities
@@ -143,6 +145,7 @@ Mobile Setup Jenks
     Click element    id=${GoogleLoginBut}
 
 Handle New Google Login
+    Log    Detected Google account not stored adding new one
     @{GoogleCreds}=    Get Uname And Pword Lpks Gmail
     ${window}=    Run keyword and return status    Select window    Title=${GoogleSignIN}
     wait until page contains element    id=${GoogleEmailField}
@@ -175,11 +178,13 @@ mobile manipulation
     mobile land info using main page
 
 mobile land info using main page
+    log    Processing Main Page
     ${count}=    Get Matching Xpath Count    ${LinksAddPlot}
     @{Links}=    Get WebElements    xpath=${LinksAddPlot}
     : FOR    ${i}    IN RANGE    1    ${count} + 1
     \    ${link}=    Get WebElement    xpath=(${LinksAddPlot})[${i}]
     \    ${Atrib}=    get element atrrib    ${link}    href
+    \    log    Processing Page | ${Atrib}
     \    click element if visable    ${link}
     \    run keyword if    '${Atrib}' == 'http://testlpks.landpotential.org:8105/#/landpks/landinfo_soillayers'    Exit for loop
     \    proc current module
@@ -190,6 +195,7 @@ mobile land info using main page
     submit Land Info
 
 proc soil layers
+    log    Processing Soil Layers
     ${count}=    Get Matching Xpath Count    ${SoilLayersXpsLI}
     : FOR    ${i}    IN RANGE    1    ${count} + 1
     \    ${link}=    Get WebElement    xpath=(${SoilLayersXpsLI})[${i}]
@@ -197,9 +203,9 @@ proc soil layers
     \    run keyword if    ${Vis}    proc soil layer
 
 proc soil layer
-    log    soil layer
-    click element    css=html body.grade-a.platform-browser.platform-win32.platform-ready ion-nav-view.view-container ion-tabs.tabs-item-hide.pane.tabs-bottom.tabs-standard ion-nav-view.view-container.tab-content div.pane ion-view.pane ion-scroll.padding.body.scroll-view.ionic-scroll.disable-user-behavior div.scroll div.othercomponent button.button.button-balanced.button-small
-    click element    css=html body.grade-a.platform-browser.platform-win32.platform-ready ion-nav-view.view-container ion-tabs.tabs-item-hide.pane.tabs-bottom.tabs-standard ion-nav-view.view-container.tab-content div.pane ion-view.pane ion-content.padding.body.scroll-content.ionic-scroll.overflow-scroll.has-header.has-footer div.scroll div#soil_form_a_ball label.item input#radioBall
+    log    Processing Individual Soil Layer
+    click button    xpath=//div[@nav-view='active']/ion-view[@cache-view='false']/ion-scroll/div[@class='scroll']/div[2]/button
+    wait until page contains element    id=radioBall
     @{Elements}=    Get Webelements    tag=input
     : FOR    ${element}    IN    @{Elements}
     \    ${text}=    Get Value    ${element}
@@ -266,9 +272,9 @@ Long Error Found
     proc error on submit
 
 Proc Lat and Long Error
-    click element    xpath=/html/body/ion-nav-bar/div[1]/ion-header-bar/div[1]/span/a[2]
-    Wait Until Element Is visible    css=html body.grade-a.platform-browser.platform-win32.platform-ready ion-nav-view.view-container ion-tabs.tabs-item-hide.pane.tabs-bottom.tabs-standard ion-nav-view.view-container.tab-content div.pane ion-view.pane ion-content.padding.body.scroll-content.ionic-scroll.overflow-scroll.has-header div.scroll a.item.item-icon-right.plotid
-    click element    css=html body.grade-a.platform-browser.platform-win32.platform-ready ion-nav-view.view-container ion-tabs.tabs-item-hide.pane.tabs-bottom.tabs-standard ion-nav-view.view-container.tab-content div.pane ion-view.pane ion-content.padding.body.scroll-content.ionic-scroll.overflow-scroll.has-header div.scroll a.item.item-icon-right.plotid
+    click element    xpath=${BackButPlotXpathLi}
+    Wait Until Element Is visible    xpath=//div[@nav-view='active']/ion-view/ion-content/div/a[1]
+    click element    xpath=//div[@nav-view='active']/ion-view/ion-content/div/a[1]
     ${RandLat}=    Generate Random String    2    123456789
     input text    id=${LatitudeInputID}    ${RandLat}
     ${RandLong}=    Generate Random String    2    123456789
@@ -280,17 +286,22 @@ Proc Lat and Long Error
 Try to submit Land Info
     Click link    xpath=${ReviewPlotXpLi}
     Click element    id=${SubmitPlotButIdLI}
-    ${result}=    Run keyword and return status    element should be visible    css=${SubmitPlotErrorButCssLI}
+    ${result}=    Run keyword and return status    element should be visible    xpath=${PopupButtonXpath}
     element should contain    xpath=/html/body/div[4]/div/div[@class='popup-body']/span[1]    The following are required
-    run keyword if    ${result}    click element    css=${SubmitPlotErrorButCssLI}
+    run keyword if    ${result}    click element    xpath=${PopupButtonXpath}
     [Return]    ${result}
 
 Add New Land Info Plot
     Wait Until Element Is visible    xpath=${LandInfoIcon}
     Click element    xpath=${LandInfoIcon}
+    : FOR    ${I}    IN RANGE    1    10
+    \    ${TextThere}=    run keyword and return status    Page should not contain element    xpath=//div[@class='loading-container']/div[@class='loading']/span
+    \    run keyword if    ${TextThere}    Exit for Loop
+    \    BuiltIn.Sleep    1s
     Wait until element is enabled    xpath=//div[@class='list']
-    Wait Until Element Is visible    xpath=${AddNewLandInfo}
-    click element    xpath=${AddNewLandInfo}
+    Wait Until Element Is enabled    xpath=${AddNewLandInfo}
+    ${Clicked}=    run keyword and return status    click element    xpath=${AddNewLandInfo}
+    run keyword unless    ${Clicked}    click element    xpath=${AddNewLandInfo}
     Wait Until Element Is visible    xpath=${AddPlotMenuPlotXpLI}
     click element    xpath=${AddPlotMenuPlotXpLI}
     Set Selenium Speed    .35 seconds
@@ -309,13 +320,13 @@ Add New Land Info Plot
 
 Check for land info sucess
     Click link    xpath=${BackButPlotXpathLi}
-    ${result}=    Run keyword and return status    page should not contain element    css=${AlertPopUpCssLI}
+    ${result}=    Run keyword and return status    page should not contain element    xpath=${PopupButtonXpath}
     [Return]    ${result}
 
 Check for land info error
     Click link    xpath=${BackButPlotXpathLi}
-    page should contain element    css=${AlertPopUpCssLI}
-    click element    css=${AlertPopUpCssLI}
+    page should contain element    xpath=${PopupButtonXpath}
+    click element    xpath=${PopupButtonXpath}
 
 Handle Exisiting Account
     ${idForAccount}=    get correct account    GoogleEmail
