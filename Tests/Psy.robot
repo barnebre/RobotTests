@@ -11,7 +11,7 @@ ${CAPABILITIES}    ${EMPTY.join(${_tmpIE})}
 ${LOGIN_FAIL_MSG}    Incorrect username or password.
 ${Browser}        firefox
 ${MobileApps}     http://testlpks.landpotential.org:8105/
-${XpathLandHome}    //[@class='scroll']/div[@class='row']/div[@class='col col-100 ']/img
+${XpathLandHome}    //div[@class='scroll']/div[@class='row']/div[@class='col col-100 ']/img
 ${GoogleLoginBut}    loginGoogleWebBrowser
 ${GoogleSignIN}    Sign in - Google Accounts
 ${LandPKSSignIn}    LandPKS Sign-In
