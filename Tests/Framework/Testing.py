@@ -291,6 +291,7 @@ def scroll_to_element(element):
 def get_browsers():
         
         browsers = json.loads(os.getenv("SAUCE_ONDEMAND_BROWSERS"))
+        logger.info(browsers)
         browserRet =[]
         for e in browsers:
             inputForE = {"browser":e["browser"],
