@@ -1,25 +1,20 @@
 from selenium import webdriver
-import time
 import re
 import requests
-import simplejson as json
-import json
 import random
 from robot.api import logger
-from _random import Random
+
 import string
-from selenium.webdriver.common import desired_capabilities
-from Selenium2Library.keywords._browsermanagement import BROWSER_NAMES
 from robot.libraries.BuiltIn import BuiltIn
-from robotide.lib.robot.utils.asserts import fail_if
+
 from selenium.common.exceptions import WebDriverException
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
 from datetime import datetime
-from mobile import mobileHandle
-from json.decoder import JSONArray
+
+
 import os
 MOBILE_APP_WEBPAGE = "http://testlpks.landpotential.org:8105/#/landpks/landpks_entry_page"
 SAUCE_ACCESS_KEY = 'Barnebre:216526d7-706f-4eff-bf40-9d774203e268'
