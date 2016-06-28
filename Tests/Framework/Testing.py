@@ -296,7 +296,7 @@ def get_browsers():
         for e in browsers:
             inputForE = {"browser":e["browser"],
                      "platform": e["platform"],
-                     "version": e["browserVersion"]
+                     "version": e["browser-version"]
                      }
             browserRet.append(inputForE)
         return browserRet
