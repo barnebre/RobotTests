@@ -133,16 +133,14 @@ Mobile Multi Setup Jenks
     \    ${caps}=    Set Jenkins Capabilities    ${Browser["browser"]}    ${Browser["platform"]}    ${Browser["version"]}
     \    Open test browser jenkins    ${caps}    ${Creds}
     \    ${Status}=    run keyword and return status    mobile manipulation
-    \    Close Test Browser Jenkins    ${Creds}    ${Browser["browser"]}    ${Status}
+    \    ${PassOrFail}    set variable if    ${Status}    PASS    Fail
+    \    Close Test Browser Jenkins    ${Creds}    ${Browser["browser"]}    ${PassOrFail}
 
 Mobile Setup Jenks
     ${Caps}=    Get Jenkins Capabilities
     ${Creds}=    Get Sauce Creds Jenkins
     Open test browser jenkins    ${Caps}    ${Creds}
-    go to    ${MobileApps}
-    wait until element is visible    xpath=${XpathLandHome}
-    Click element    xpath=${XpathLandHome}
-    Click element    id=${GoogleLoginBut}
+    mobile manipulation
 
 Handle New Google Login
     Log    Detected Google account not stored adding new one
@@ -319,11 +317,13 @@ Add New Land Info Plot
     run keyword if    ${GPSError}    click element    xpath=//div[@class='popup-buttons']/button[@class='button ng-binding button-positive']
 
 Check for land info sucess
+    wait until page contains element    xpath=${BackButPlotXpathLi}
     Click link    xpath=${BackButPlotXpathLi}
     ${result}=    Run keyword and return status    page should not contain element    xpath=${PopupButtonXpath}
     [Return]    ${result}
 
 Check for land info error
+    wait until page contains element    xpath=${BackButPlotXpathLi}
     Click link    xpath=${BackButPlotXpathLi}
     page should contain element    xpath=${PopupButtonXpath}
     click element    xpath=${PopupButtonXpath}
