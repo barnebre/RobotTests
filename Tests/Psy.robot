@@ -33,7 +33,7 @@ ${BackButPlotXpathLi}    //div[@nav-bar='active']/ion-header-bar/div[1]/span/a[2
 ${LandInfoErrorMessage}    Answer to test plot is required.
 ${AlertPopUpCssLI}    body.grade-a.platform-browser.platform-win32.platform-ready.popup-open div.popup-container.remove-title-class.popup-showing.active div.popup div.popup-buttons button.button.ng-binding.button-positive
 ${ErrorMessageCssLI}    body.grade-a.platform-browser.platform-win32.platform-ready.popup-open div.popup-container.remove-title-class.popup-showing.active div.popup div.popup-body span
-${AddPlotMenuPlotXpLI}    /html/body/ion-nav-view/ion-tabs/ion-nav-view/div/ion-view/ion-content/div/a
+${AddPlotMenuPlotXpLI}    //ion-view[@cache-view='false']/ion-content/div[@class='scroll']/a[1]
 ${SubmitPlotButIdLI}    btnSubmitPlot_1
 ${SubmitPlotErrorButCssLI}    body.grade-a.platform-browser.platform-win32.platform-ready.popup-open div.popup-container.remove-title-class.popup-showing.active div.popup div.popup-buttons button.button.ng-binding.button-positive
 ${ReviewPlotXpLi}    //div[@class='scroll']/a[9]
@@ -46,12 +46,31 @@ ${LatitudeInputID}    latitude
 ${LongitudeInputID}    longitude
 ${PopupButtonXpath}    //div[@class='popup-buttons']/button[@class='button ng-binding button-positive']
 ${PopupBodyXpath}    //div
+${LoadingContainerXpath}    //div[@class='loading-container']
+${LoadingBody}    /div[@class='loading']/span
+${TypeOfPhoto}    //p[@class='lpks-p']/b/b/a
+${PhotoBack}      //div[@nav-bar='active']/ion-header-bar/button
+${PopUpOkayButXpath}    //div[@class='popup-buttons']/button[@class='button ng-binding button-positive']
+${LoadingContainerActive}    //div[@class='loading-container visible active']
 
 *** Test Cases ***
+Photo Test
+    [Tags]    Jenkins
+    Set Selenium Timeout    15 seconds
+    Set Selenium Speed    .3 seconds
+    ${Creds}=    Get Sauce Creds Jenkins
+    @{Browsers}=    Get Browsers
+    : FOR    ${Browser}    IN    @{Browsers}
+    \    ${caps}=    Set Jenkins Capabilities    ${Browser["browser"]}    ${Browser["platform"]}    ${Browser["version"]}
+    \    Open test browser jenkins    ${caps}    ${Creds}
+    \    ${Status}=    run keyword and return status    mobile manipulation    true
+    \    ${PassOrFail}    set variable if    ${Status}    PASS    Fail
+    \    Close Test Browser Jenkins    ${Creds}    ${Browser["platform"]} | ${Browser["browser"]} | ${Browser["version"]}    ${PassOrFail}
+
 Get Jenkins Driver
     [Tags]    Jenkins
     Set Selenium Timeout    15 seconds
-    Set Selenium Speed    1.2 seconds
+    Set Selenium Speed    .3 seconds
     ${JenkinsSetupSize}=    Get Browser Setup Count
     run keyword if    ${JenkinsSetupSize} >1    Mobile Multi Setup Jenks
     ...    ELSE    Mobile Setup Jenks
@@ -117,8 +136,10 @@ Close test browser
 
 Close test browser Jenkins
     [Arguments]    ${URL}    ${Name}    ${Status}
-    Run keyword if    '${URL}' != ''    Report Sauce status    ${SUITE_NAME} | ${Name}    ${Status}    Jenkins    ${URL}
+    ${Mess}=    Set Variable if    '${Status}'=='Fail'    Failed on ${Function}    Pass
+    Run keyword if    '${URL}' != ''    Report Sauce status    ${Mess} | ${Name}    ${Status}    Jenkins    ${URL}
     Close all browsers
+    run keyword unless    '${Status}'=='PASS'    BuiltIn.Fail
 
 Mobile Setup
     Open test browser
@@ -132,15 +153,15 @@ Mobile Multi Setup Jenks
     : FOR    ${Browser}    IN    @{Browsers}
     \    ${caps}=    Set Jenkins Capabilities    ${Browser["browser"]}    ${Browser["platform"]}    ${Browser["version"]}
     \    Open test browser jenkins    ${caps}    ${Creds}
-    \    ${Status}=    run keyword and return status    mobile manipulation
+    \    ${Status}=    run keyword and return status    mobile manipulation    false
     \    ${PassOrFail}    set variable if    ${Status}    PASS    Fail
-    \    Close Test Browser Jenkins    ${Creds}    ${Browser["browser"]}    ${PassOrFail}
+    \    Close Test Browser Jenkins    ${Creds}    ${Browser["platform"]} | ${Browser["browser"]} | ${Browser["version"]}    ${PassOrFail}
 
 Mobile Setup Jenks
     ${Caps}=    Get Jenkins Capabilities
     ${Creds}=    Get Sauce Creds Jenkins
     Open test browser jenkins    ${Caps}    ${Creds}
-    mobile manipulation
+    mobile manipulation    false
 
 Handle New Google Login
     Log    Detected Google account not stored adding new one
@@ -155,28 +176,56 @@ Handle New Google Login
     Page should contain element    xpath=${GoogleSignINBut}
     Wait Until Element Is Enabled    xpath=${GoogleSignINBut}
     Wait Until Element Is visible    xpath=${GoogleSignINBut}
-    Click element    ${GoogleSignINBut}
+    Click element    xpath=${GoogleSignINBut}
     Page should contain element    id=${GoogleApproveAccess}
     click element    id=${GoogleApproveAccess}
 
 mobile manipulation
+    [Arguments]    ${PhotoTest}
+    Set Test Variable    ${Function}    Browser Init
     go to    ${MobileApps}
     Wait Until Element Is Enabled    xpath=${XpathLandHome}
     Wait Until Element Is visible    xpath=${XpathLandHome}
     Click element    xpath=${XpathLandHome}
+    Set Test Variable    ${Function}    Google Login
     Click element    id=${GoogleLoginBut}
     ${ele}=    Run Keyword And Return Status    Element Should Not Be Visible    id=account-chooser-add-account
     Run keyword if    ${ele}    Handle New Google Login
     ...    ELSE    Handle Exisiting Account
     Select Window    ${LandPKSSignIn}
+    Set Test Variable    ${Function}    Adding new plot
     Add New Land Info Plot
     ${Sucess}=    Check for land info sucess
     run keyword if    ${Sucess}    Try to submit Land Info
     Check for land info sucess
+    run keyword if    '${PhotoTest}'=='true'    Process Photos
     mobile land info using main page
 
+Process Photos
+    Set Test Variable    ${Function}    Processing Photos
+    ${PhotoPage}=    Get WebElement    xpath=(${LinksAddPlot})[contains(@href,'landinfo_photos')]
+    click link    ${PhotoPage}
+    @{PhotoTypes}=    Get Web Elements    xpath=${TypeOfPhoto}
+    : FOR    ${PhotoType}    IN    @{PhotoTypes}
+    \    log    ${PhotoType}
+    \    Click Link    ${PhotoType}
+    \    Proc Photo    xpath=//div[@id='aTagNorth']/a
+    \    Proc Photo    xpath=//div[@id='aTagEast']/a
+    \    Proc Photo    xpath=//div[@id='aTagSouth']/a
+    \    Proc Photo    xpath=//div[@id='aTagWest']/a
+    \    Click Element    xpath=${BackButPlotXpathLi}
+
+Proc Photo
+    [Arguments]    ${PhotoPath}
+    Click Link    ${PhotoPath}
+    ${PopUpVis}=    run keyword and return status    element should be visible    xpath=${PopUpOkayButXpath}
+    run keyword if    ${PopUpVis}    Click Element    xpath=${PopUpOkayButXpath}
+    Click button    id=snap
+    ${BackButPres}=    Run Keyword And Return Status    Page Should Contain Element    xpath=${PhotoBack}
+    click element if visable by locator    xpath=${PhotoBack}
+
 mobile land info using main page
-    log    Processing Main Page
+    Set Test Variable    ${Function}    Processing Main Page
     ${count}=    Get Matching Xpath Count    ${LinksAddPlot}
     @{Links}=    Get WebElements    xpath=${LinksAddPlot}
     : FOR    ${i}    IN RANGE    1    ${count} + 1
@@ -193,7 +242,7 @@ mobile land info using main page
     submit Land Info
 
 proc soil layers
-    log    Processing Soil Layers
+    Set Test Variable    ${Function}    Processing Soil Layers
     ${count}=    Get Matching Xpath Count    ${SoilLayersXpsLI}
     : FOR    ${i}    IN RANGE    1    ${count} + 1
     \    ${link}=    Get WebElement    xpath=(${SoilLayersXpsLI})[${i}]
@@ -201,7 +250,7 @@ proc soil layers
     \    run keyword if    ${Vis}    proc soil layer
 
 proc soil layer
-    log    Processing Individual Soil Layer
+    Set Test Variable    ${Function}    Processing Individual Soil Layer
     click button    xpath=//div[@nav-view='active']/ion-view[@cache-view='false']/ion-scroll/div[@class='scroll']/div[2]/button
     wait until page contains element    id=radioBall
     @{Elements}=    Get Webelements    tag=input
@@ -239,13 +288,14 @@ click element if visable by locator
     [Return]    ${Visible}
 
 submit Land Info
+    Set Test Variable    ${Function}    Submitting Plot
     Click link    xpath=${ReviewPlotXpLi}
     Click element    id=${SubmitPlotButIdLI}
     ${success}=    Run keyword and return status    Element Should Contain    xpath=//div[@class='popup-body']/span[1]    Confirm submit. Submitted data may become publicly available.
     run keyword if    '${success}'=='False'    Proc Error on Submit
     ${result}=    Run keyword and return status    element should be visible    xpath=//div[@class='popup-buttons']/button[@class='button ng-binding button-positive']
     run keyword if    ${result}    click element    xpath=//div[@class='popup-buttons']/button[@class='button ng-binding button-positive']
-    wait until element is visible    xpath=//div[@class='popup-body']/span[1]
+    Wait for load
     ${success}=    Run keyword and return status    Element Should Contain    xpath=//div[@class='popup-body']/span[1]    Plot is submitted
     run keyword if    ${success}    element should be visible    xpath=//div[@class='popup-buttons']/button[@class='button ng-binding button-positive']
     run keyword if    ${success}    click element    xpath=//div[@class='popup-buttons']/button[@class='button ng-binding button-positive']
@@ -253,6 +303,7 @@ submit Land Info
     [Return]    ${success}
 
 Proc error on submit
+    Set Test Variable    ${Function}    Processing Errors
     ${PopupBody}=    set variable    //div[@class='popup-body']/span
     ${count}=    Get Matching Xpath Count    ${PopupBody}
     : FOR    ${i}    IN RANGE    1    ${count} + 1
@@ -289,15 +340,22 @@ Try to submit Land Info
     run keyword if    ${result}    click element    xpath=${PopupButtonXpath}
     [Return]    ${result}
 
+Wait for load
+    Set Test Variable    ${Function}    Waiting for load
+    : FOR    ${I}    IN RANGE    1    10
+    \    ${TextThere}=    run keyword and return status    Element Should Be Visible    xpath=${LoadingContainerXpath}
+    \    ${Loading}=    Run keyword and return status    Element should Be visible    xpath=${LoadingContainerActive}
+    \    run keyword unless    ${TextThere} or ${Loading}    Exit for Loop
+    \    BuiltIn.Sleep    1s
+
 Add New Land Info Plot
     Wait Until Element Is visible    xpath=${LandInfoIcon}
     Click element    xpath=${LandInfoIcon}
-    : FOR    ${I}    IN RANGE    1    10
-    \    ${TextThere}=    run keyword and return status    Page should not contain element    xpath=//div[@class='loading-container']/div[@class='loading']/span
-    \    run keyword if    ${TextThere}    Exit for Loop
-    \    BuiltIn.Sleep    1s
+    Wait for load
     Wait until element is enabled    xpath=//div[@class='list']
+    BuiltIn.Sleep    1s
     Wait Until Element Is enabled    xpath=${AddNewLandInfo}
+    BuiltIn.Sleep    1s
     ${Clicked}=    run keyword and return status    click element    xpath=${AddNewLandInfo}
     run keyword unless    ${Clicked}    click element    xpath=${AddNewLandInfo}
     Wait Until Element Is visible    xpath=${AddPlotMenuPlotXpLI}
